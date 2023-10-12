@@ -1,14 +1,11 @@
 package ru.kata.spring.boot_security.demo.controller;
-
-
-import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/admin")
@@ -19,54 +16,31 @@ public class AdminsController {
     private final UserService userService;
 
     private static final String REDIRECT = "redirect:/admin";
-
     public AdminsController(RoleService roleService, UserService userService) {
         this.roleService = roleService;
         this.userService = userService;
     }
 
-
     @GetMapping("")
-    public String allUsers (Model model) {
+    public String allUsers ( @ModelAttribute("newUser") User newUser, Principal principal, Model model) {
+        User admin = userService.findByUsername(principal.getName());
+        model.addAttribute("admin", admin);
         model.addAttribute("user", userService.getUserList());
+        model.addAttribute("roles", roleService.allRoles());
         return "admin";
     }
 
-
-    @GetMapping("/{id}")
-    public String show (@PathVariable("id") long id, Model model) {
-        model.addAttribute("user", userService.findUserToID(id));
-        return "show";
-    }
-
-    @GetMapping("/new")
-    public String newUser( User user, Model model) {
-        model.addAttribute("roles", roleService.allRoles());
-        return "new";
-    }
-
     @PostMapping("")
-    public String create(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()){
-            model.addAttribute("userRoles", roleService.allRoles());
-            return "new";
-        }
+    public String create(@ModelAttribute("user")User user) {
         userService.add(user);
         return REDIRECT;
     }
-    @GetMapping("/{id}/edit")
-    public String edit(@PathVariable("id") long id, Model model) {
-        model.addAttribute("user", userService.findUserToID(id));
-        model.addAttribute("userRoles", roleService.allRoles());
-        return "edit";
-    }
 
-    @PatchMapping("/{id}")
-    public String update(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("userRoles", roleService.allRoles());
-            return "edit";
-        }
+
+
+    @PatchMapping( "/{id}/edit")
+    public String update(@ModelAttribute("user") User user) {
+
         userService.updateUser(user);
         return REDIRECT;
     }

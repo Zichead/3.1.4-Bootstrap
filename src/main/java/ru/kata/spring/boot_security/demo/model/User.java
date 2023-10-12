@@ -1,15 +1,10 @@
 package ru.kata.spring.boot_security.demo.model;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -17,7 +12,7 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(String name, String password, String surname, String email, List<Role> roles) {
+    public User(String name, String password, String surname, String email, Set<Role> roles) {
         this.name = name;
         this.password = password;
         this.surname = surname;
@@ -27,43 +22,27 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private long id;
 
-    @NotEmpty(message = "Username should not be empty")
-    @Column(name = "userName")
     private String username;
 
-    @NotEmpty(message = "Name should not be empty")
-    @Size(min = 2, max = 30, message = "Name should be tween 2 and 30 characters")
-    @Column(name = "name")
     private String name;
 
-    @NotEmpty(message = "Password should not be empty")
-    @Column(name = "password")
     private String password;
 
-    @NotEmpty(message = "Surname should not be empty")
-    @Size(min = 2, max = 30, message = "Surname should be tween 2 and 30 characters")
-    @Column(name = "surname")
     private String surname;
-
 
     public void setUsername(String username) {
         this.username = username;
     }
 
-    @Email
-    @NotEmpty(message = "Email should not be empty")
-    @Column(name = "email")
     private String email;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private List<Role> roles;
-
+    private Set<Role> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -136,11 +115,11 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    public List<Role> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<Role> roles) {
+    public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 
@@ -180,5 +159,13 @@ public class User implements UserDetails {
                 ", email='" + email + '\'' +
                 ", roles=" + roles +
                 '}';
+    }
+
+    public String roleToString(){
+        StringBuilder sb = new StringBuilder();
+        for(Role role: roles){
+            sb.append(role.roleName()).append(" ");
+        }
+        return sb.toString();
     }
 }

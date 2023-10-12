@@ -1,5 +1,4 @@
 package ru.kata.spring.boot_security.demo;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -9,12 +8,9 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
+import java.util.HashSet;
+import java.util.Set;
 
-import java.util.Arrays;
-import java.util.List;
-
-//ApplicationListener - интерфейс, который позволяет обрабатывать ApplicationEvent события
-//ContextRefreshedEvent - публикуется автоматически после поднятия контекста
 @Component
 public class DatabaseInitializer implements ApplicationListener<ContextRefreshedEvent> {
 
@@ -40,8 +36,11 @@ public class DatabaseInitializer implements ApplicationListener<ContextRefreshed
         adminRole.setName("ROLE_ADMIN");
         roleRepository.save(adminRole);
 
-        List<Role> userRoles = List.of(userRole);
-        List<Role> adminRoles = Arrays.asList(adminRole, userRole);
+        Set<Role> userRoles = new HashSet<>();
+        userRoles.add(userRole);
+        Set<Role> adminRoles = new HashSet<>();
+        adminRoles.add(adminRole);
+        adminRoles.add(userRole);
 
         User admin = new User();
         admin.setUsername("admin");
